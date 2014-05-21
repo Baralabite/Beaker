@@ -47,6 +47,7 @@ class Application:
                     self.joy_pos = float("{0:.2f}".format(event.value)), self.joy_pos[1]
 
                 self.calculateSpeeds()
+		print self.speeds
 
     def calculateSpeeds(self):
         left = MAX_SPEED*self.joy_pos[1]
