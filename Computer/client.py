@@ -1,6 +1,6 @@
-import pygame, socket
+import pygame, time, beaker
 
-HOST = ("192.168.52.3", 80)
+HOST = ("192.168.0.3", 1997)
 
 MAX_SPEED = 400
 PULSE_MIDDLE = 1500
@@ -14,6 +14,8 @@ class Application:
         self.joy_pos = (0, 0)
         self.speeds = (0, 0)
 
+        self.beaker = beaker.Beaker()
+
     def start(self):
         pygame.init()
 
@@ -24,8 +26,7 @@ class Application:
         print "Joystick:", self.joystick.get_name()
         self.joystick.init()
 
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.connect(HOST)
+        self.beaker.connect(HOST)
         
         self.running = True
         self.loop()
@@ -47,6 +48,8 @@ class Application:
                     self.joy_pos = float("{0:.2f}".format(event.value)), self.joy_pos[1]
 
                 self.calculateSpeeds()
+                self.beaker.moveLeftWheel(self.speeds[0])
+                self.beaker.moveRightWheel(self.speeds[1])
 		print self.speeds
 
     def calculateSpeeds(self):
@@ -57,8 +60,12 @@ class Application:
             left = left - (right*abs(self.joy_pos[0]))*2
         else:
             right = right - (left*abs(self.joy_pos[0]))*2
+
+        left = left + 1500
+        right = right + 1500
+        self.speeds = int(left), int(right)
+        self.beaker.poll()
         
-        self.speeds = left, right
 
     def loop(self):
         #While the running flag is true...
@@ -71,6 +78,7 @@ class Application:
 
         #When the running flag is set to false, quit loop and shutdown everything!            
         pygame.quit()
+        self.beaker.disconnect()
         quit()
 
 if __name__ == "__main__":
